@@ -8,6 +8,22 @@ The system replaces fragmented workflows across **WhatsApp, Excel, Email, and Go
 
 ---
 
+My deployed Vercel production URL is:
+
+[https://](https://PASTE-YOUR-ACTUAL-VERCEL-URL-HERE.v)[**audit-system-blush-five.vercel.app**](https://audit-system-blush-five.vercel.app/)
+
+Please now add this exact origin to the FastAPI `CORSMiddleware` `allow_origins` list.
+
+Keep these existing origins:
+
+* http://localhost:5173
+* http://127.0.0.1:5173
+
+Do not use `*` and do not make any other changes.
+
+After the change, run the requested checks and show me the final CORS configuration. Do not commit or push.
+
+
 ## 🚀 Overview
 
 Audit work often involves repeatedly collecting documents from clients, checking them, requesting corrections, assigning work, reviewing submissions, and maintaining evidence of what happened.
