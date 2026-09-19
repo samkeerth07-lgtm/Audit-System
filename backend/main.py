@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from routes.auth import router as auth_router
@@ -21,9 +23,23 @@ import os
 
 from fastapi.middleware.cors import CORSMiddleware
 
-Base.metadata.create_all(bind=engine)
+from seed import seed_data
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Initializing database...")
+    Base.metadata.create_all(bind=engine)
+    print("Database initialized")
+    print("Running demo data seed...")
+    seed_result = seed_data()
+    print(f"Demo data seed completed: {seed_result}")
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[

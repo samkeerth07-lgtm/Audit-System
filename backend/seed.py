@@ -2,66 +2,102 @@ from database import SessionLocal
 from models import Firm, User, Client
 
 
-db = SessionLocal()
+def _normalize_name(value):
+    return (value or "").strip().lower()
 
 
-abc = Firm(name="ABC & Co.")
-xyz = Firm(name="XYZ & Co.")
+def seed_data():
+    db = SessionLocal()
 
-db.add_all([abc, xyz])
-db.commit()
+    try:
+        firms = {
+            "ABC & Co.": None,
+            "XYZ & Co.": None,
+        }
 
+        for firm_name in firms:
+            firm = db.query(Firm).filter(Firm.name == firm_name).first()
+            if firm is None:
+                firm = Firm(name=firm_name)
+                db.add(firm)
+                db.flush()
+            firms[firm_name] = firm
 
-ravi = User(
-    firm_id=abc.id,
-    name="Ravi",
-    email="ravi@abc.com",
-    password_hash="demo",
-    role="STAFF"
-)
+        db.commit()
 
-anil = User(
-    firm_id=abc.id,
-    name="Anil",
-    email="anil@abc.com",
-    password_hash="demo",
-    role="REVIEWER"
-)
+        demo_users = {
+            "ravi@abc.com": {"name": "Ravi", "firm_id": firms["ABC & Co."].id, "password_hash": "demo", "role": "STAFF"},
+            "anil@abc.com": {"name": "Anil", "firm_id": firms["ABC & Co."].id, "password_hash": "demo", "role": "REVIEWER"},
+            "priya@xyz.com": {"name": "Priya", "firm_id": firms["XYZ & Co."].id, "password_hash": "demo", "role": "STAFF"},
+            "meena@xyz.com": {"name": "Meena", "firm_id": firms["XYZ & Co."].id, "password_hash": "demo", "role": "REVIEWER"},
+        }
 
-priya = User(
-    firm_id=xyz.id,
-    name="Priya",
-    email="priya@xyz.com",
-    password_hash="demo",
-    role="STAFF"
-)
+        existing_users = {
+            _normalize_name(user.email): user
+            for user in db.query(User).filter(User.email.in_([email for email in demo_users])).all()
+        }
 
-meena = User(
-    firm_id=xyz.id,
-    name="Meena",
-    email="meena@xyz.com",
-    password_hash="demo",
-    role="REVIEWER"
-)
+        for email, details in demo_users.items():
+            key = _normalize_name(email)
+            user = existing_users.get(key)
 
-db.add_all([ravi, anil, priya, meena])
-db.commit()
+            if user is None:
+                db.add(
+                    User(
+                        firm_id=details["firm_id"],
+                        name=details["name"],
+                        email=email,
+                        password_hash=details["password_hash"],
+                        role=details["role"],
+                    )
+                )
+                continue
 
+            if (
+                user.name != details["name"]
+                or user.firm_id != details["firm_id"]
+                or user.password_hash != details["password_hash"]
+                or user.role != details["role"]
+                or _normalize_name(user.email) != key
+            ):
+                user.name = details["name"]
+                user.firm_id = details["firm_id"]
+                user.password_hash = details["password_hash"]
+                user.role = details["role"]
+                user.email = email
 
-abc_client = Client(
-    firm_id=abc.id,
-    name="ABC Traders Pvt. Ltd."
-)
+        db.commit()
 
-xyz_client = Client(
-    firm_id=xyz.id,
-    name="XYZ Enterprises Pvt. Ltd."
-)
+        client_map = {
+            "ABC Traders Pvt. Ltd.": firms["ABC & Co."].id,
+            "XYZ Enterprises Pvt. Ltd.": firms["XYZ & Co."].id,
+        }
 
-db.add_all([abc_client, xyz_client])
-db.commit()
+        existing_clients = {
+            (client.name, client.firm_id): client
+            for client in db.query(Client).filter(Client.name.in_(list(client_map.keys()))).all()
+        }
 
+        for client_name, firm_id in client_map.items():
+            key = (client_name, firm_id)
+            if key not in existing_clients:
+                db.add(Client(firm_id=firm_id, name=client_name))
 
-db.close()
+        db.commit()
 
-print("Sample data created successfully!")
+        firm_count = db.query(Firm).count()
+        user_count = db.query(User).count()
+        client_count = db.query(Client).count()
+
+        print("Database initialized")
+        print(f"Demo users verified: {user_count} users, {firm_count} firms, {client_count} clients")
+        print("Demo data seed completed")
+
+        return {
+            "firms": firm_count,
+            "users": user_count,
+            "clients": client_count,
+        }
+
+    finally:
+        db.close()
