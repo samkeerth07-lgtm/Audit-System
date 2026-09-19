@@ -1,5 +1,6 @@
 import "./App.css";
 import { useEffect, useState } from "react";
+import { API_URL } from "./api";
 import Login from "./login";
 
 interface User {
@@ -160,8 +161,8 @@ function App() {
 
       try {
         const [userResponse, clientsResponse] = await Promise.all([
-          fetch("http://127.0.0.1:8000/auth/me", { headers }),
-          fetch("http://127.0.0.1:8000/clients", { headers }),
+          fetch(`${API_URL}/auth/me`, { headers }),
+          fetch(`${API_URL}/clients`, { headers }),
         ]);
 
         if (!userResponse.ok || !clientsResponse.ok) {
@@ -197,7 +198,7 @@ function App() {
       setReviewQueueError(false);
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/review-queue", {
+        const response = await fetch(`${API_URL}/review-queue`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -233,7 +234,7 @@ function App() {
         const documentsByClient = await Promise.all(
           clients.map(async (client) => {
             const response = await fetch(
-              `http://127.0.0.1:8000/clients/${client.id}/documents`,
+              `${API_URL}/clients/${client.id}/documents`,
               {
                 headers: {
                   Authorization: `Bearer ${token}`,
@@ -278,7 +279,7 @@ function App() {
 
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/clients/${selectedClient.id}/documents`,
+          `${API_URL}/clients/${selectedClient.id}/documents`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -315,7 +316,7 @@ function App() {
 
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/documents/${selectedDocument.id}`,
+          `${API_URL}/documents/${selectedDocument.id}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -351,7 +352,7 @@ function App() {
 
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/documents/${selectedDocument.id}/audit-history`,
+          `${API_URL}/documents/${selectedDocument.id}/audit-history`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -385,7 +386,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/documents/${selectedDocument.id}/${path}`,
+        `${API_URL}/documents/${selectedDocument.id}/${path}`,
         {
           method: "POST",
           headers: {
@@ -432,7 +433,7 @@ function App() {
       formData.append("file", selectedFile);
 
       const response = await fetch(
-        `http://127.0.0.1:8000/documents/${selectedDocument.id}/upload`,
+        `${API_URL}/documents/${selectedDocument.id}/upload`,
         {
           method: "POST",
           headers: {
@@ -481,7 +482,7 @@ function App() {
     setCreateClientError(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/clients", {
+      const response = await fetch(`${API_URL}/clients`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -525,7 +526,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/clients/${selectedClient.id}/documents`,
+        `${API_URL}/clients/${selectedClient.id}/documents`,
         {
           method: "POST",
           headers: {
