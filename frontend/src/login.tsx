@@ -44,7 +44,11 @@ function Login({ onLogin }: LoginProps) {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1>Mini Audit Review System</h1>
+        <h1 className="login-title">
+          <span>Mini Audit</span>
+          <span>Review</span>
+          <span>System</span>
+        </h1>
         <p>Sign in to continue</p>
 
         <form onSubmit={handleLogin}>

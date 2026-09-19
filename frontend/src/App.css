@@ -558,8 +558,19 @@ button:disabled {
   border-radius: 14px;
 }
 
-.login-card h1 {
-  margin-bottom: 8px;
+.login-title {
+  width: 100%;
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.08;
+  font-weight: 800;
+  letter-spacing: 0;
+  overflow-wrap: break-word;
+}
+
+.login-title span {
+  display: block;
 }
 
 .login-card > p {
